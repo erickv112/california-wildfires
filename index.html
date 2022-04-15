@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>History of Wildfires in California</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+
+    <!-- Slider -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js'></script>
+
+    <!-- Moment.js -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 20px;
+        line-height: 30px;
+      }
+
+      h2 {
+        font-size: 14px;
+        line-height: 20px;
+        margin-bottom: 10px;
+      }
+      h3 {
+        font-size: 14px;
+        line-height: 20px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+      }
+
+      /* Import Google Font - Poppins */
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+      *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      ::selection{
+        color: #fff;
+        background: #17A2B8;
+      }
+
+      #console {
+        margin-top: 1%;
+        margin-left: 1%;
+        position: absolute;
+        width: 400px;
+        background: #fff;
+        border-radius: 10px;
+        border: 2px solid black;
+        padding: 20px 25px 40px;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+            }
+      header h2{
+        font-size: 24px;
+        font-weight: 600;
+      }
+      header p{
+        margin-top: 5px;
+        font-size: 16px;
+      }
+      .value-input{
+        width: 100%;
+        display: flex;
+        margin: 30px 0 35px;
+      }
+      .value-input .field{
+        display: flex;
+        width: 30%;
+        height: 30px;
+        align-items: center;
+      }
+      .field input{
+        width: 100%;
+        height: 100%;
+        outline: none;
+        font-size: 19px;
+        margin-left: 12px;
+        border-radius: 5px;
+        text-align: center;
+        border: 1px solid #999;
+        -moz-appearance: textfield;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+      }
+      .value-input .separator{
+        width: 130px;
+        display: flex;
+        font-size: 19px;
+        align-items: center;
+        justify-content: center;
+      }
+      .slider{
+        height: 5px;
+        position: relative;
+        background: #ddd;
+        border-radius: 5px;
+      }
+      .slider .progress{
+        height: 100%;
+        left: 0%;
+        right: 0%;
+        position: absolute;
+        border-radius: 5px;
+        background: #f28466;
+      }
+      .range-input{
+        position: relative;
+      }
+      .range-input input{
+        position: absolute;
+        width: 100%;
+        height: 5px;
+        top: -5px;
+        background: none;
+        pointer-events: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+      input[type="range"]::-webkit-slider-thumb{
+        height: 17px;
+        width: 17px;
+        border-radius: 50%;
+        background: #fc0000;
+        pointer-events: auto;
+        -webkit-appearance: none;
+        box-shadow: 0 0 6px rgba(0,0,0,0.05);
+      }
+      input[type="range"]::-moz-range-thumb{
+        height: 17px;
+        width: 17px;
+        border: none;
+        border-radius: 50%;
+        background: #fc0000;
+        pointer-events: auto;
+        -moz-appearance: none;
+        box-shadow: 0 0 6px rgba(0,0,0,0.05);
+      }
+      .fire-info {
+        position: absolute;
+        font-family: sans-serif;
+        margin-top: 240px;
+        margin-left: 1%;
+        padding: 5px;
+        width: 200px;
+        border: 2px solid black;
+        font-size: 14px;
+        color: #222;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.1)
+      }
+
+
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <div id="console">
+
+        <header>
+          <h2>History of California Wildfires</h2>
+          <p>Use slider or enter min and max year</p>
+        </header>
+        <div class="value-input">
+          <div class="field">
+            <span>Min Year</span>
+            <input type="number" class="input-min" value="1920">
+          </div>
+          <div class="separator">-</div>
+          <div class="field">
+            <span>Max Year</span>
+            <input type="number" class="input-max" value="2020">
+          </div>
+        </div>
+        <div class="slider">
+          <div class="progress"></div>
+        </div>
+        <div class="range-input">
+          <input type="range" class="range-min" min="1920" max="2020" value="1920" step="1">
+          <input type="range" class="range-max" min="1920" max="2020" value="2020" step="1">
+        </div>
+
+    </div>
+    <div class='fire-info'>
+      <div><strong>Name:</strong> <span id='name'></span></div>
+      <div><strong>Year:</strong> <span id='year'></span></div>
+      <div><strong>Area:</strong> <span id='area'></span></div>
+    </div>
+    <script>
+
+    let filterYearMin = ['<=', ['number', ['get', 'YEAR_INT']], 2020];
+    const rangeInput = document.querySelectorAll(".range-input input"),
+    valueInput = document.querySelectorAll(".value-input input"),
+    range = document.querySelector(".slider .progress");
+    let valueGap = 0;
+
+    valueInput.forEach(input =>{
+        input.addEventListener("input", e =>{
+            let minValue = parseInt(valueInput[0].value),
+            maxValue = parseInt(valueInput[1].value);
+
+            if((maxValue - minValue >= valueGap) && maxValue <= rangeInput[1].max){
+                if(e.target.className === "input-min"){
+                    rangeInput[0].value = minValue;
+                    //range.style.left = ((minValue-1920 / rangeInput[0].max-1920) * 100) + "%";
+                }else{
+                    rangeInput[1].value = maxValue;
+                    //range.style.right = 100 - (maxValue-1920 / rangeInput[1].max-1920) * 100 + "%";
+                }
+            }
+            valueInput[0].value = minVal;
+            valueInput[1].value = maxVal;
+        });
+    });
+
+    rangeInput.forEach(input =>{
+        input.addEventListener("input", e =>{
+            let minVal = parseInt(rangeInput[0].value),
+            maxVal = parseInt(rangeInput[1].value);
+
+
+                valueInput[0].value = minVal;
+                valueInput[1].value = maxVal;
+                // range.style.left = ((minVal / rangeInput[0].max ) * 100) + "%";
+                // range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
+                filterYearmax = ['<=', ['number', ['get', 'YEAR_INT']], maxVal];
+                filterYearMin = ['>=', ['number', ['get', 'YEAR_INT']], minVal];
+                map.setFilter('fire-boundary', ['all', filterYearmax, filterYearMin]);
+        });
+    });
+
+
+
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZXJpY2t2MTEyIiwiYSI6ImNsMXBmdDN0bjB0aHgzZm80NWxnYnV2cTIifQ.5eW6PmQCeWwbOAQgRI8TKw';
+      const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/erickv112/cl201tg5t001315lonqa4fkm9',
+        center: [-119.652367, 36.822089],
+        zoom: 5
+      });
+
+      let hoveredFireId = null;
+
+        map.on('load', function() {
+
+            map.addSource('firedata', {
+    					'type': 'vector',
+    					'url': 'mapbox://erickv112.8m7uqj4v',
+    				});
+    				map.addLayer({
+    					'id': 'fire-boundary',
+    					'type': 'fill',
+    					'source-layer': "firedata19202020",
+    					'source': 'firedata',
+              'layout': {},
+    					'paint': {
+    						'fill-color': "red",
+    						'fill-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  1,
+                  0.3
+                ]
+    					}
+    				});
+            const nameDisplay = document.getElementById('name');
+            const yearDisplay = document.getElementById('year');
+            const areaDisplay = document.getElementById('area');
+
+
+            let fireID = null;
+
+            map.on('mousemove', 'fire-boundary', (event) => {
+              map.getCanvas().style.cursor = 'pointer';
+              // Set constants equal to the current feature's magnitude, location, and time
+              const fireName = event.features[0].properties.FIRE_NAME;
+              const fireYear = event.features[0].properties.YEAR_INT;
+              const fireArea = event.features[0].properties.Shape_Area;
+
+              // Check whether features exist
+              if (event.features.length === 0) return;
+              // Display the magnitude, location, and time in the sidebar
+                  nameDisplay.textContent = fireName;
+                  yearDisplay.textContent = fireYear;
+                  areaDisplay.textContent = Math.round(Math.sqrt(fireArea/1000)) + "km²";
+
+
+              fireID = event.features[0].id;
+
+              // When the mouse moves over the earthquakes-viz layer, update the
+              // feature state for the feature under the mouse
+              map.setFeatureState(
+                {
+                  source: 'firedata',
+    					    sourceLayer: "firedata19202020",
+                  id: fireID
+                },
+                {
+                  hover: true
+                }
+              );
+            });
+            map.on('mouseleave', 'fire-boundary', () => {
+              if (fireID) {
+                map.setFeatureState(
+                  {
+                    source: 'firedata',
+    					      sourceLayer: "firedata19202020",
+                    id: fireID
+                  },
+                  {
+                    hover: false
+                  }
+                );
+              }
+
+              fireID = null;
+              // Remove the information from the previously hovered feature from the sidebar
+              nameDisplay.textContent = '';
+              yearDisplay.textContent = '';
+              areaDisplay.textContent = '';
+              // Reset the cursor style
+              map.getCanvas().style.cursor = '';
+            });
+    			});
+    </script>
+  </body>
+</html>
