@@ -249,8 +249,8 @@
                 valueInput[1].value = maxVal;
                 // range.style.left = ((minVal / rangeInput[0].max ) * 100) + "%";
                 // range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
-                filterYearmax = ['<=', ['number', ['get', 'YEAR_INT']], maxVal];
-                filterYearMin = ['>=', ['number', ['get', 'YEAR_INT']], minVal];
+                filterYearmax = ['<=', ['number', ['get', 'YEAR_INT']], parseInt(valueInput[1].value)];
+                filterYearMin = ['>=', ['number', ['get', 'YEAR_INT']], parseInt(valueInput[0].value)];
                 map.setFilter('fire-boundary', ['all', filterYearmax, filterYearMin]);
         });
     });
