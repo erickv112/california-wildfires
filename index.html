@@ -70,7 +70,7 @@
         background: #fff;
         border-radius: 10px;
         border: 2px solid black;
-        padding: 20px 25px 40px;
+        padding: 20px 25px 20px;
         box-shadow: 0 12px 35px rgba(0,0,0,0.1);
             }
       header h2{
@@ -163,7 +163,7 @@
       .fire-info {
         position: absolute;
         font-family: sans-serif;
-        margin-top: 330px;
+        margin-top: 380px;
         margin-left: 1%;
         padding: 5px;
         width: 200px;
@@ -205,6 +205,12 @@
           <input type="range" class="range-min" min="1920" max="2020" value="1920" step="1">
           <input type="range" class="range-max" min="1920" max="2020" value="2020" step="1">
         </div>
+        <div>
+          <br>
+          <br>
+          <p><i>Data from the <a href="https://frap.fire.ca.gov/mapping/gis-data/">California Department of Forestry and Fire Protection</a></i></p>
+        </div>
+
 
     </div>
     <div class='fire-info'>
@@ -213,13 +219,13 @@
       <div><strong>Area Burned:</strong> <span id='area'></span></div>
     </div>
     <script>
-
+// Defining global variables
     let filterYearMin = ['<=', ['number', ['get', 'YEAR_INT']], 2020];
     const rangeInput = document.querySelectorAll(".range-input input"),
     valueInput = document.querySelectorAll(".value-input input"),
     range = document.querySelector(".slider .progress");
     let valueGap = 0;
-
+// Reading the value for input
     valueInput.forEach(input =>{
         input.addEventListener("input", e =>{
             let minValue = parseInt(valueInput[0].value),
@@ -228,17 +234,17 @@
             if((maxValue - minValue >= valueGap) && maxValue <= rangeInput[1].max){
                 if(e.target.className === "input-min"){
                     rangeInput[0].value = minValue;
-                    //range.style.left = ((minValue-1920 / rangeInput[0].max-1920) * 100) + "%";
+
                 }else{
                     rangeInput[1].value = maxValue;
-                    //range.style.right = 100 - (maxValue-1920 / rangeInput[1].max-1920) * 100 + "%";
+
                 }
             }
             valueInput[0].value = minVal;
             valueInput[1].value = maxVal;
         });
     });
-
+// Reading the value for the range slider
     rangeInput.forEach(input =>{
         input.addEventListener("input", e =>{
             let minVal = parseInt(rangeInput[0].value),
@@ -247,8 +253,7 @@
 
                 valueInput[0].value = minVal;
                 valueInput[1].value = maxVal;
-                // range.style.left = ((minVal / rangeInput[0].max ) * 100) + "%";
-                // range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
+                // Update the map with the boundaries as per the range slider
                 filterYearmax = ['<=', ['number', ['get', 'YEAR_INT']], parseInt(valueInput[1].value)];
                 filterYearMin = ['>=', ['number', ['get', 'YEAR_INT']], parseInt(valueInput[0].value)];
                 map.setFilter('fire-boundary', ['all', filterYearmax, filterYearMin]);
@@ -261,12 +266,13 @@
       const map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/erickv112/cl201tg5t001315lonqa4fkm9',
-        center: [-119.652367, 36.822089],
-        zoom: 5
+        center: [-121.962367, 36.822089],
+        zoom: 5.5
       });
-
+// Variable to understand hover and create ID
       let hoveredFireId = null;
-
+//Load data and map
+// Cater to vector data
         map.on('load', function() {
 
             map.addSource('firedata', {
@@ -289,6 +295,7 @@
                 ]
     					}
     				});
+            // Edit the meta deata display
             const nameDisplay = document.getElementById('name');
             const yearDisplay = document.getElementById('year');
             const areaDisplay = document.getElementById('area');
@@ -298,14 +305,14 @@
 
             map.on('mousemove', 'fire-boundary', (event) => {
               map.getCanvas().style.cursor = 'pointer';
-              // Set constants equal to the current feature's magnitude, location, and time
+              // Set constants equal to the current feature's name, area, and year
               const fireName = event.features[0].properties.FIRE_NAME;
               const fireYear = event.features[0].properties.YEAR_INT;
               const fireArea = event.features[0].properties.Shape_Area;
 
               // Check whether features exist
               if (event.features.length === 0) return;
-              // Display the magnitude, location, and time in the sidebar
+              // Display the name, year and area in the sidebar
                   nameDisplay.textContent = fireName;
                   yearDisplay.textContent = fireYear;
                   areaDisplay.textContent = Math.round(Math.sqrt(fireArea/1000)) + "km²";
@@ -313,7 +320,7 @@
 
               fireID = event.features[0].id;
 
-              // When the mouse moves over the earthquakes-viz layer, update the
+              // When the mouse moves over the  layer, update the
               // feature state for the feature under the mouse
               map.setFeatureState(
                 {
